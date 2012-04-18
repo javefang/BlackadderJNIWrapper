@@ -1,0 +1,17 @@
+Java wrapper for Blackadder v0.2
+
+Both blocking and non-blocking API are supported
+
+How to install
+
+1. Build native code
+   a. Use with OpenJDK
+      $ cd jni
+      $ make
+
+   b. Use with Android
+      $ cd <android project dir>
+      $ ln -s <path to the jni dir>
+      $ NDK_MODULE_PATH=jni ndk-build
+
+2. Write Java code and use the wrapper 
