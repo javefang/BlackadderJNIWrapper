@@ -2,23 +2,22 @@ package uk.ac.cam.cl.xf214.blackadderWrapper.callback;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 
 import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent;
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent.BAEventType;
-import uk.ac.cam.cl.xf214.blackadderWrapper.data.BAPrefix;
+import uk.ac.cam.cl.xf214.blackadderWrapper.BAHelper;
 
 public class HashClassifierCallback implements BAWrapperNBCallback {	
 	public static final String TAG = "HashClassifierCallback";
 	
 	private HashMap<Integer, BlockingQueue<BAEvent>> dataQueueMap;
-	private Vector<BAPrefix> controlQueueList;	// TODO: change to use TreeMap to implement longest prefix match
+	private LPMTree<BAPushControlEventHandler> controlQueueLPM;
 	
 	public HashClassifierCallback() {
 		dataQueueMap = new HashMap<Integer, BlockingQueue<BAEvent>>();
-		controlQueueList = new Vector<BAPrefix>();
+		controlQueueLPM = new LPMTree<BAPushControlEventHandler>();
 	}
 	
 	@Override
@@ -26,10 +25,11 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 		// identify event type
 		BAEventType eventType = event.getType();
 		boolean checkControlQueue;
-		//LocalDebugger.print(TAG, "Event received, type is " + eventType);
+		
 		if (eventType == BAEventType.PUBLISHED_DATA) {	// If the event is published data
 			// put event to a matching data queue
 			int hashRid = Arrays.hashCode(event.getId());
+			//LocalDebugger.print(TAG, "Acquiring mutex lock for dataQueueMap...");
 			synchronized(dataQueueMap) {
 				if (dataQueueMap.containsKey(hashRid)) {
 					checkControlQueue = false;
@@ -38,45 +38,47 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 					// TODO: check if controlQueue has prefix to match
 					checkControlQueue = true;
 				}
+				//LocalDebugger.print(TAG, "Releasing mutex lock for dataQueueMap...");
 			}
 		} else {
 			checkControlQueue = true;
 		}
 		
 		if (checkControlQueue) {	// if the event is type other than published data (control event)
+			LocalDebugger.print(TAG, "Control Event received, type=" + eventType + ", RID=" + BAHelper.byteToHex(event.getId()));
 			byte[] rid = event.getId();
-			BAPrefix currentPrefix;
-			synchronized(controlQueueList) {
-				for (int i = 0; i < controlQueueList.size(); i++) {
-					currentPrefix = controlQueueList.get(i);
-					if (currentPrefix.prefixMatch(rid)) {
-						switch(eventType) {
-						case PUBLISHED_DATA:
-							currentPrefix.getHandler().newData(event);
-							break;
-						case SCOPE_PUBLISHED:
-							// RECV: inform relevant modules about published scope
-							currentPrefix.getHandler().scopePublished(event);
-							break;
-						case SCOPE_UNPUBLISHED:
-							// RECV: inform relevant modules about unpublished scope
-							currentPrefix.getHandler().scopeUnpublished(event);
-							break;
-						case START_PUBLISH:
-							// SEND: inform sender to start sending data
-							currentPrefix.getHandler().startPublish(event);
-							break;
-						case STOP_PUBLISH:
-							// SEND: inform sender to stop sending data
-							currentPrefix.getHandler().stopPublish(event);
-							break;
-						default:
-							// TODO: unknown event, flag error message
-						} // end switch			
-					} // end if
-				} // end while
-			} // end sync
-		} // end if	
+			synchronized(controlQueueLPM) {
+				//LocalDebugger.print(TAG, "Acquiring mutex lock for controlQueueList...");
+				BAPushControlEventHandler handler = controlQueueLPM.searchPrefix(rid);
+				if (handler != null) {
+					LocalDebugger.print(TAG, "Found matching prefix: " + BAHelper.byteToHex(rid));
+					switch(eventType) {
+					case PUBLISHED_DATA:
+						handler.newData(event);
+						break;
+					case SCOPE_PUBLISHED:
+						// RECV: inform relevant modules about published scope
+						handler.scopePublished(event);
+						break;
+					case SCOPE_UNPUBLISHED:
+						// RECV: inform relevant modules about unpublished scope
+						handler.scopeUnpublished(event);
+						break;
+					case START_PUBLISH:
+						// SEND: inform sender to start sending data
+						handler.startPublish(event);
+						break;
+					case STOP_PUBLISH:
+						// SEND: inform sender to stop sending data
+						handler.stopPublish(event);
+						break;
+					default:
+						LocalDebugger.printe(TAG, "Unknown event, type=" + event.getType());
+						// TODO: unknown event, flag error message
+					} // end switch
+				}
+			}
+		}
 	}
 
 	public void registerDataQueue(byte[] rid, BlockingQueue<BAEvent> dataQueue) {
@@ -91,15 +93,15 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 		}
 	}
 	
-	public void registerControlQueue(BAPrefix prefix) {
-		synchronized(controlQueueList) {
-			controlQueueList.add(prefix);
+	public void registerControlQueue(byte[] prefix, BAPushControlEventHandler handler) {
+		synchronized(controlQueueLPM) {
+			controlQueueLPM.add(prefix, handler);
 		}
 	}
 	
-	public void unregisterControlQueue(BAPrefix prefix) {
-		synchronized(controlQueueList) {
-			controlQueueList.remove(prefix);
+	public void unregisterControlQueue(byte[] prefix) {
+		synchronized(controlQueueLPM) {
+			controlQueueLPM.delete(prefix);
 		}
 	}
 	

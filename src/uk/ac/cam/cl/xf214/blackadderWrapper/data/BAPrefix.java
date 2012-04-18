@@ -3,10 +3,10 @@ package uk.ac.cam.cl.xf214.blackadderWrapper.data;
 import java.util.Arrays;
 
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAHelper;
-import uk.ac.cam.cl.xf214.blackadderWrapper.BAWrapperShared;
 import uk.ac.cam.cl.xf214.blackadderWrapper.ByteArrayHelper;
 import uk.ac.cam.cl.xf214.blackadderWrapper.callback.BAPushControlEventHandler;
 
+@Deprecated
 public class BAPrefix {
 	private byte[] prefix;
 	private BAPushControlEventHandler handler;
@@ -44,5 +44,10 @@ public class BAPrefix {
 	@Override
 	public boolean equals(Object newPrefix) {
 		return hashCode() == ((BAPrefix)newPrefix).hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "BAPrefix: " + BAHelper.byteToHex(prefix);
 	}
 }

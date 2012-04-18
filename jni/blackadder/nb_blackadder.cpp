@@ -62,12 +62,11 @@ void *NB_Blackadder::worker(void *arg) {
     while (true) {
         pthread_mutex_lock(&worker_mutex);
         pthread_cond_wait(&worker_cond, &worker_mutex);
-        
         while (event_queue.size() > 0) {
             ev = event_queue.front();
             event_queue.pop();
             pthread_mutex_unlock(&worker_mutex);
-            cf(ev); 
+            cf(ev);
             pthread_mutex_lock(&worker_mutex);
         }
         pthread_mutex_unlock(&worker_mutex);
@@ -89,7 +88,7 @@ void *NB_Blackadder::selector(void *arg) {
     } else {
         high_sock = sock_fd;
     }
-    while (true) {	/* CHANGE: check flag to detect if thread should terminate */
+    while (true) {
         if (select(high_sock + 1, &read_set, &write_set, NULL, NULL) == -1) {
             perror("NB_Blackadder Library: select() error..retrying!");
         } else {
