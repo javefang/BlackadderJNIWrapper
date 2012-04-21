@@ -261,8 +261,21 @@ NB_Blackadder::~NB_Blackadder() {
         pthread_cond_wait(&queue_overflow_cond, &selector_mutex);
     }
     pthread_mutex_unlock(&selector_mutex);
-    //    pthread_cancel(worker_thread);
-    //    pthread_cancel(selector_thread);
+    
+    // kill selector and worker threads (incomplete)
+    /*
+    Event *kill_ev = new Event();
+    kill_ev->type = TERMINATE_THREAD;
+    pthread_mutex_lock(&selector_mutex);
+    output_queue.push(kill_ev);
+    if (output_queue.size() == 1000) {
+      pthread_cond_wait(&queue_overflow_cond, &selector_mutex);
+    }
+    pthread_con
+    */
+
+    // pthread_cancel(worker_thread);
+    // pthread_cancel(selector_thread);
     if (sock_fd != -1) {
         close(sock_fd);
         cout << "NB_Blackadder Library: Closed netlink socket" << endl;
