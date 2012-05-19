@@ -2,7 +2,7 @@ package uk.ac.cam.cl.xf214.blackadderWrapper.callback;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent;
@@ -12,17 +12,18 @@ import uk.ac.cam.cl.xf214.blackadderWrapper.BAHelper;
 public class HashClassifierCallback implements BAWrapperNBCallback {	
 	public static final String TAG = "HashClassifierCallback";
 	
-	private HashMap<Integer, BlockingQueue<BAEvent>> dataQueueMap;
+	private HashMap<Integer, ArrayBlockingQueue<BAEvent>> dataQueueMap;
 	private LPMTree<BAPushControlEventHandler> controlQueueLPM;
 	
 	public HashClassifierCallback() {
-		dataQueueMap = new HashMap<Integer, BlockingQueue<BAEvent>>();
+		dataQueueMap = new HashMap<Integer, ArrayBlockingQueue<BAEvent>>();
 		controlQueueLPM = new LPMTree<BAPushControlEventHandler>();
 	}
 	
 	@Override
 	public void eventReceived(BAEvent event) {
 		// identify event type
+		//LocalDebugger.print(TAG, "new event!");
 		BAEventType eventType = event.getType();
 		boolean checkControlQueue;
 		
@@ -33,7 +34,11 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 			synchronized(dataQueueMap) {
 				if (dataQueueMap.containsKey(hashRid)) {
 					checkControlQueue = false;
-					dataQueueMap.get(hashRid).offer(event);	// TODO: change to avoid waiting indefinitely
+					//LocalDebugger.print(TAG, "Offering BA_PKT to dataQueue " + dataQueueMap.get(hashRid));
+					boolean success = dataQueueMap.get(hashRid).offer(event);	// TODO: offer can fail here
+					if (!success) {
+						event.freeNativeBuffer();
+					}
 				} else {	// queueMap does not contain the queue for the eventId
 					// TODO: check if controlQueue has prefix to match
 					checkControlQueue = true;
@@ -81,7 +86,7 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 		}
 	}
 
-	public void registerDataQueue(byte[] rid, BlockingQueue<BAEvent> dataQueue) {
+	public void registerDataQueue(byte[] rid, ArrayBlockingQueue<BAEvent> dataQueue) {
 		synchronized(dataQueueMap) {
 			dataQueueMap.put(Arrays.hashCode(rid), dataQueue);
 		}

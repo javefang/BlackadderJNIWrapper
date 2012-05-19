@@ -1,5 +1,6 @@
 package uk.ac.cam.cl.xf214.blackadderWrapper.callback;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -15,8 +16,8 @@ import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent;
 public class BlockingQueueCallback implements BAWrapperNBCallback {
 	private BlockingQueue<BAEvent> eventQueue;
 	
-	public BlockingQueueCallback() {
-		eventQueue = new LinkedBlockingQueue<BAEvent>();
+	public BlockingQueueCallback(int queueSize) {
+		eventQueue = new ArrayBlockingQueue<BAEvent>(queueSize);
 	}
 	
 	/**

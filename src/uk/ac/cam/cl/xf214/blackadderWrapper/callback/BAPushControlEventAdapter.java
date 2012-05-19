@@ -1,6 +1,5 @@
 package uk.ac.cam.cl.xf214.blackadderWrapper.callback;
 
-import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent;
 
 public class BAPushControlEventAdapter implements BAPushControlEventHandler {

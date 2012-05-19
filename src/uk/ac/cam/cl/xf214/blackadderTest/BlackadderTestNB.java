@@ -80,7 +80,7 @@ public class BlackadderTestNB {
 	private static void startEventHandler() {
 		final Thread printEventThread = new Thread(new Runnable() {
 			public void run() {
-				BlockingQueueCallback callback = new BlockingQueueCallback();
+				BlockingQueueCallback callback = new BlockingQueueCallback(1000);
 				BAWrapperNB.setCallback(callback);
 				
 				BAEvent event;

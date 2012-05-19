@@ -147,6 +147,11 @@ public class BAEvent {
 			dataLength = 0;
 		}		
 	}
+	
+	/* TODO: added to get raw memory directly, need further check */
+	public ByteBuffer getDirectData() {
+		return data;
+	}
 
 	public byte[] getData(int offset, int length) {
 		if(freed){

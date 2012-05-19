@@ -69,7 +69,7 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 	}
 
 	public void unpublishItem(byte[] scope, byte[] prefixScope, byte strat, byte[] strategyOptions) {
-		LocalDebugger.print(TAG, "unpublishScope(): " + BAHelper.byteToHex(prefixScope) + BAHelper.byteToHex(scope));
+		LocalDebugger.print(TAG, "unpublishItem(): " + BAHelper.byteToHex(prefixScope) + BAHelper.byteToHex(scope));
 		c_unpublish_item(baPtr, scope, prefixScope, strat, strategyOptions);
 	}
 

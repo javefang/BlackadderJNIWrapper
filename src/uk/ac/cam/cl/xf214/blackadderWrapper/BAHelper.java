@@ -71,6 +71,8 @@ public class BAHelper {
 		return data;
 	}
 	
+	
+	
 	public static String byteToText(byte[] data) {
 		char[] textChar = new char[data.length];
 		for (int i = 0; i < data.length; i++) {
