@@ -103,6 +103,8 @@ public class BlackadderTestNB {
 
 							byte[] payload = new byte[1000];
 							Arrays.fill(payload, (byte) 5);
+							// ByteBuffer code has performance issue on Android devices, disable for the moment
+							/*
 							buffer = ByteBuffer.allocateDirect(payload.length);
 							buffer.put(payload);
 							buffer.flip();
@@ -112,6 +114,7 @@ public class BlackadderTestNB {
 								wrapper.publishData(event.getId(), strategy, null,
 									buffer);
 							}
+							*/
 							printe("Data published!");
 							break;
 						case BAEvent.STOP_PUBLISH:

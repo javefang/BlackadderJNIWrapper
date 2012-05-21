@@ -97,7 +97,8 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 		c_publish_data(baPtr, scope, strat, strategyOptions, jData, jData.length);		
 	}
 	
-	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer) {			
+	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer) {
+		// TODO: suspected performance issue, use with caution
 		c_publish_data_direct(baPtr, scope, strat, strategyOptions, buffer, buffer.capacity());		
 	}
 	
