@@ -93,13 +93,13 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 		c_unsubscribe_item(baPtr, scope, prefixScope, strat, strategyOptions);
 	}	
 
-	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, byte[] jData) {			
-		c_publish_data(baPtr, scope, strat, strategyOptions, jData, jData.length);		
+	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, byte[] jData, int length) {			
+		c_publish_data(baPtr, scope, strat, strategyOptions, jData, length);		
 	}
 	
-	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer) {
+	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int off, int length) {
 		// TODO: suspected performance issue, use with caution
-		c_publish_data_direct(baPtr, scope, strat, strategyOptions, buffer, buffer.capacity());		
+		c_publish_data_direct(baPtr, scope, strat, strategyOptions, buffer, off, length);		
 	}
 	
 	/* called by c++ code */
@@ -152,6 +152,6 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 	private native void c_unsubscribe_scope(long ba_ptr, byte[] scope, byte[] prefixScope, byte strat, byte[] strategyOptions);
 	private native void c_unsubscribe_item(long ba_ptr, byte[] scope, byte[] prefixScope, byte strat, byte[] strategyOptions);
 	private native void c_publish_data(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, byte[] dataBuffer, int length);
-	private native void c_publish_data_direct(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int length);
+	private native void c_publish_data_direct(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int off, int length);
 	private native void c_delete_event(long ba_ptr, long event_ptr);
 }

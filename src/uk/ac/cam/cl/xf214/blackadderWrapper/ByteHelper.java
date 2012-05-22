@@ -1,5 +1,8 @@
 package uk.ac.cam.cl.xf214.blackadderWrapper;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.TreeSet;
 
 public class ByteHelper {
@@ -92,6 +95,33 @@ public class ByteHelper {
 	
 	// TEST ONLY
 	public static void main(String[] args) {
+		byte[] payloadA = new byte[100];
+		byte[] payloadB = new byte[50];
+		Arrays.fill(payloadA, (byte)5);
+		Arrays.fill(payloadB, (byte)1);
+		ByteArrayOutputStream os = new ByteArrayOutputStream(200);
+		try {
+			System.out.printf("Writing %d bytes value 5 to OS\n", payloadA.length);
+			os.write(payloadA);
+			os.flush();
+			System.out.printf("OS size is %d\n", os.size());
+			os.reset();
+			System.out.printf("OS size after reset() is %d\n", os.size());
+			System.out.printf("Writting %d bytes value 1 to OS\n", payloadB.length);
+			os.write(payloadB);
+			os.flush();
+			System.out.printf("OS size is %d\n", os.size());
+			byte[] result = os.toByteArray();
+			System.out.printf("Convert OS to byte[], size is %d\n", result.length);
+			
+
+			os.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 		
 		byte[] shared = new byte[10];
 		int off = 2;

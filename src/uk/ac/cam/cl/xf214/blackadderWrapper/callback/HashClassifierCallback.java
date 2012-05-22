@@ -2,7 +2,6 @@ package uk.ac.cam.cl.xf214.blackadderWrapper.callback;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.BAEvent;
@@ -12,12 +11,12 @@ import uk.ac.cam.cl.xf214.blackadderWrapper.BAHelper;
 public class HashClassifierCallback implements BAWrapperNBCallback {	
 	public static final String TAG = "HashClassifierCallback";
 	
-	private HashMap<Integer, ArrayBlockingQueue<BAEvent>> dataQueueMap;
-	private LPMTree<BAPushControlEventHandler> controlQueueLPM;
+	private HashMap<Integer, BAPushDataEventHandler> dataHandlerMap;
+	private LPMTree<BAPushControlEventHandler> controlEventHandlerLPM;
 	
 	public HashClassifierCallback() {
-		dataQueueMap = new HashMap<Integer, ArrayBlockingQueue<BAEvent>>();
-		controlQueueLPM = new LPMTree<BAPushControlEventHandler>();
+		dataHandlerMap = new HashMap<Integer, BAPushDataEventHandler>();
+		controlEventHandlerLPM = new LPMTree<BAPushControlEventHandler>();
 	}
 	
 	@Override
@@ -31,14 +30,11 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 			// put event to a matching data queue
 			int hashRid = Arrays.hashCode(event.getId());
 			//LocalDebugger.print(TAG, "Acquiring mutex lock for dataQueueMap...");
-			synchronized(dataQueueMap) {
-				if (dataQueueMap.containsKey(hashRid)) {
+			synchronized(dataHandlerMap) {
+				if (dataHandlerMap.containsKey(hashRid)) {
 					checkControlQueue = false;
 					//LocalDebugger.print(TAG, "Offering BA_PKT to dataQueue " + dataQueueMap.get(hashRid));
-					boolean success = dataQueueMap.get(hashRid).offer(event);	// TODO: offer can fail here
-					if (!success) {
-						event.freeNativeBuffer();
-					}
+					dataHandlerMap.get(hashRid).publishedData(event);	// TODO: data handler must ensure fast returning
 				} else {	// queueMap does not contain the queue for the eventId
 					// TODO: check if controlQueue has prefix to match
 					checkControlQueue = true;
@@ -52,9 +48,9 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 		if (checkControlQueue) {	// if the event is type other than published data (control event)
 			LocalDebugger.print(TAG, "Control Event received, type=" + eventType + ", RID=" + BAHelper.byteToHex(event.getId()));
 			byte[] rid = event.getId();
-			synchronized(controlQueueLPM) {
+			synchronized(controlEventHandlerLPM) {
 				//LocalDebugger.print(TAG, "Acquiring mutex lock for controlQueueList...");
-				BAPushControlEventHandler handler = controlQueueLPM.searchPrefix(rid);
+				BAPushControlEventHandler handler = controlEventHandlerLPM.searchPrefix(rid);
 				if (handler != null) {
 					LocalDebugger.print(TAG, "Found matching prefix: " + BAHelper.byteToHex(rid));
 					switch(eventType) {
@@ -86,27 +82,27 @@ public class HashClassifierCallback implements BAWrapperNBCallback {
 		}
 	}
 
-	public void registerDataQueue(byte[] rid, ArrayBlockingQueue<BAEvent> dataQueue) {
-		synchronized(dataQueueMap) {
-			dataQueueMap.put(Arrays.hashCode(rid), dataQueue);
+	public void registerDataEventHandler(byte[] rid, BAPushDataEventHandler dataQueue) {
+		synchronized(dataHandlerMap) {
+			dataHandlerMap.put(Arrays.hashCode(rid), dataQueue);
 		}
 	}
 	
-	public void unregisterDataQueue(byte[] rid) {
-		synchronized(dataQueueMap) {
-			dataQueueMap.remove(Arrays.hashCode(rid));
+	public void unregisterDataEventHandler(byte[] rid) {
+		synchronized(dataHandlerMap) {
+			dataHandlerMap.remove(Arrays.hashCode(rid));
 		}
 	}
 	
-	public void registerControlQueue(byte[] prefix, BAPushControlEventHandler handler) {
-		synchronized(controlQueueLPM) {
-			controlQueueLPM.add(prefix, handler);
+	public void registerControlEventHandler(byte[] prefix, BAPushControlEventHandler handler) {
+		synchronized(controlEventHandlerLPM) {
+			controlEventHandlerLPM.add(prefix, handler);
 		}
 	}
 	
-	public void unregisterControlQueue(byte[] prefix) {
-		synchronized(controlQueueLPM) {
-			controlQueueLPM.delete(prefix);
+	public void unregisterControlEventHandler(byte[] prefix) {
+		synchronized(controlEventHandlerLPM) {
+			controlEventHandlerLPM.delete(prefix);
 		}
 	}
 	
