@@ -1,6 +1,7 @@
 package uk.ac.cam.cl.xf214.blackadderWrapper;
 
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.callback.BAWrapperNBCallback;
@@ -93,13 +94,13 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 		c_unsubscribe_item(baPtr, scope, prefixScope, strat, strategyOptions);
 	}	
 
-	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, byte[] jData, int length) {			
+	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, byte[] jData, int length) {
 		c_publish_data(baPtr, scope, strat, strategyOptions, jData, length);		
 	}
 	
-	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int off, int length) {
+	public void publishData(byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int length) {
 		// TODO: suspected performance issue, use with caution
-		c_publish_data_direct(baPtr, scope, strat, strategyOptions, buffer, off, length);		
+		c_publish_data_direct(baPtr, scope, strat, strategyOptions, buffer, length);		
 	}
 	
 	/* called by c++ code */
@@ -152,6 +153,6 @@ public class BAWrapperNB extends BAWrapperShared implements EventManagement {
 	private native void c_unsubscribe_scope(long ba_ptr, byte[] scope, byte[] prefixScope, byte strat, byte[] strategyOptions);
 	private native void c_unsubscribe_item(long ba_ptr, byte[] scope, byte[] prefixScope, byte strat, byte[] strategyOptions);
 	private native void c_publish_data(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, byte[] dataBuffer, int length);
-	private native void c_publish_data_direct(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int off, int length);
+	private native void c_publish_data_direct(long ba_ptr, byte[] scope, byte strat, byte[] strategyOptions, ByteBuffer buffer, int length);
 	private native void c_delete_event(long ba_ptr, long event_ptr);
 }
