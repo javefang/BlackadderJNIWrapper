@@ -1,7 +1,6 @@
 package uk.ac.cam.cl.xf214.blackadderWrapper;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import uk.ac.cam.cl.xf214.DebugTool.LocalDebugger;
 import uk.ac.cam.cl.xf214.blackadderWrapper.callback.BAWrapperNBCallback;

@@ -3,7 +3,6 @@ package uk.ac.cam.cl.xf214.blackadderWrapper;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.TreeSet;
 
 public class ByteHelper {
 	
