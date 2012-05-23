@@ -154,7 +154,7 @@ void *NB_Blackadder::selector(void *arg) {
                     free(msg.msg_iov);
                 } 
 //                else {
-//                    perror("NB_Blackadder Library: could not write!!");
+//                    perror("NB_Blackadder Library: could not write!! ");
 //                }
                 FD_ZERO(&write_set);
                 if (output_queue.size() > 0) {

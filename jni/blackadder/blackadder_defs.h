@@ -49,4 +49,6 @@
 #define RV_RESPONSE 106	
 #define NETLINK_BADDER 20
 
+#define KILL_THREAD 107
+
 #endif /* BLACKADDER_DEFS_HPP */

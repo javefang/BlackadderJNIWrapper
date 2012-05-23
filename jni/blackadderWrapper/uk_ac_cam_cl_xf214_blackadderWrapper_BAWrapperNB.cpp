@@ -15,16 +15,16 @@ void print(string s) {
 	cout << "BAWrapperNB: " << s << endl;
 }
 
-void detachVMThread(void *cached_jvm) {
-	print("Detaching from VM thread...");
-	/*
+void detachVMThread(JavaVM *cached_jvm) {
+	print("Detaching thread from VM...");
+	
 	JNIEnv *env;
-	int status = baJVM->GetEnv((void **)&env,  JNI_VERSION_1_6);
+	int status = cached_jvm->GetEnv((void **)&env,  JNI_VERSION_1_6);
 	if (status < 0) {
-		cout << "Thread not attached to VM, abort..." << endl;
+		cerr << "Thread not attached to VM, abort..." << endl;
 		return;
-	}*/
-	int status = ((JavaVM *)cached_jvm)->DetachCurrentThread();
+	}
+	status = ((JavaVM *)cached_jvm)->DetachCurrentThread();
 	if (status < 0) {
 		cerr << "Failed to detach VM thread!" << endl;
 	} else {
@@ -50,13 +50,20 @@ void onEventReceived(Event *ev) {
 			cerr << "Cannot call Java method (JNIEnv failed)." << endl;
 			return;
 		}
-		
-		// set thread destructor
-		print("Setting thread destructor...");
-		pthread_key_create(&worker_thread_key, detachVMThread);
-		pthread_setspecific(worker_thread_key, baJVM);
-		print("Native thread successfully attached to VM!");
 	}
+
+	/*
+	if (ev->type == KILL_THREAD) {
+		cout << "KILL_THREAD request received!" << endl;
+		delete ev;
+		cout << "Detaching thread from JVM..." << endl;
+		detachVMThread(baJVM);
+		cout << "Exiting worker_thread..." << endl;
+		pthread_exit(0);
+		cout << "worker_thread terminated!" << endl;
+		return;
+	}
+	*/
 
 	//cout << "Receiving new event..." << endl;
 	// copy id array
@@ -126,6 +133,8 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 	
 	JNIEnv *env;
 	int status = baJVM->GetEnv((void **)&env, JNI_VERSION_1_6);
+	/*
+	// thread is attached by jvm, no need to attach
 	if (status < 0) {
 		cerr << "Failed to get JNI environment, assuming native thread" << endl;
 		status = baJVM->AttachCurrentThread(&env, NULL);
@@ -135,6 +144,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 			return -1;
 		}
 	}
+	*/
 	
 	// find BAWrapperNB class (only perform this in the "OnLoad" function
 	// this ensure correct classloader is used to load non-system class (BAWrapperNB)
@@ -160,8 +170,10 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved) {
 		cerr << "Error: Cannot find method signature!! abort..." << endl;
 		return -3;
 	}
-	
+
 	cout << "JNI initialization complete!" << endl;
+	// DO NOT CALL DetachCurrentThread on JNI_OnLOad (thread is attached by jvm)
+	
 	return JNI_VERSION_1_6;
 }
 
