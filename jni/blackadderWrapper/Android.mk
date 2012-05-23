@@ -1,5 +1,4 @@
-MY_LOCAL_PATH := $(call my-dir)
-LOCAL_PATH := $(MY_LOCAL_PATH)
+LOCAL_PATH := $(MY_LOCAL_PATH)/blackadderWrapper
 
 # build blackadder wrapper
 include $(CLEAR_VARS)
@@ -11,10 +10,4 @@ LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)
 
 include $(BUILD_SHARED_LIBRARY)
 $(call import-module,blackadder)
-
-include $(MY_LOCAL_PATH)/libjpeg/Android.mk
-#include $(MY_LOCAL_PATH)/platform_external_jpeg/Android.mk
-include $(MY_LOCAL_PATH)/speex/Android.mk
-#include $(MY_LOCAL_PATH)/pubsub/Android.mk
-include $(MY_LOCAL_PATH)/netperf/Android.mk
 
