@@ -6,6 +6,8 @@ import java.util.Arrays;
 
 public class ByteHelper {
 	
+	/* deprecated due to GC performance issue */
+	@Deprecated
 	public static byte[] getBytes(int value) {
 		return new byte[] {
 	            (byte)(value >> 24),
@@ -14,6 +16,8 @@ public class ByteHelper {
 	            (byte)value};
 	}
 	
+	/* deprecated due to GC performance issue */
+	@Deprecated
 	public static byte[] getBytes(long value) {
 		return new byte[] {
 				(byte)(value >> 56),
@@ -27,6 +31,8 @@ public class ByteHelper {
 	           };
 	}
 	
+	/* deprecated due to GC performance issue */
+	@Deprecated
 	public static byte[] getBytes(short value) {
 		return new byte[] {
 				(byte)(value >> 8),
@@ -67,14 +73,14 @@ public class ByteHelper {
 		return (short)(b[off+ 0] << 8 | b[off+ 1] & 0xFF);
 	}
 	
-	public static void writeBytes(int value, byte[] b, int off) {
+	public static void getBytes(int value, byte[] b, int off) {
 		b[off + 0] = (byte)(value >> 24);
 		b[off + 1] = (byte)(value >> 16);
 		b[off + 2] = (byte)(value >>  8);
 		b[off + 3] = (byte)(value >>  0);
 	}
 	
-	public static void writeBytes(long value, byte[] b, int off) {
+	public static void getBytes(long value, byte[] b, int off) {
 		b[off + 0] = (byte)(value >> 56);
 		b[off + 1] = (byte)(value >> 48);
 		b[off + 2] = (byte)(value >> 40);
@@ -85,7 +91,7 @@ public class ByteHelper {
 		b[off + 7] = (byte)(value >>  0);
 	}
 	
-	public static void writeBytes(short value, byte[] b, int off) {
+	public static void getBytes(short value, byte[] b, int off) {
 		b[off + 0] = (byte)(value >> 8);
 		b[off + 1] = (byte)(value >> 0);
 	}
@@ -131,7 +137,7 @@ public class ByteHelper {
 			System.err.println("Error in short conversion functions");
 			return;
 		}
-		writeBytes(shortVal, shared, off);
+		getBytes(shortVal, shared, off);
 		if (shortVal != getShort(shared, off)) {
 			System.err.println("Error in short conversion direct bytes functions");
 			return;
@@ -145,7 +151,7 @@ public class ByteHelper {
 			System.err.println("Error in int conversion functions");
 			return;
 		}
-		writeBytes(intVal, shared, off);
+		getBytes(intVal, shared, off);
 		if (intVal != getInt(shared, off)) {
 			System.err.println("Error in int conversion direct bytes functions");
 			return;
@@ -159,7 +165,7 @@ public class ByteHelper {
 			System.err.println("Error in long conversion functions");
 			return;
 		}
-		writeBytes(longVal, shared, off);
+		getBytes(longVal, shared, off);
 		if (longVal != getLong(shared, off)) {
 			System.err.println("Error in long conversion direct bytes functions");
 			return;
@@ -171,10 +177,13 @@ public class ByteHelper {
 		System.out.println();
 		long x = Long.MAX_VALUE - 19122;
 		int loop = Integer.MAX_VALUE;
+		byte[] target = new byte[10];
 		
+		System.out.println("Testing speed to convert long->byte[]->long...");
 		long start = System.nanoTime();
 		for (int i = 0; i < loop; i++) {
-			getLong(getBytes(x), 0);
+			getBytes(x, target, 0);
+			getLong(target, 0);
 		}
 		long end = System.nanoTime();
 		System.out.printf("Average execution time: %.6f ns\n", (end - start) / (double)loop);
