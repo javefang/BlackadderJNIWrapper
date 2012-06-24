@@ -9,6 +9,7 @@ public class ByteArrayHelper {
 		return rtn;
 	}
 	
+	/*
 	public static boolean prefixMatch(byte[] rid, byte[] prefix) {
 		// no match if prefix is longer than rid
 		if (rid.length < prefix.length) {
@@ -26,4 +27,5 @@ public class ByteArrayHelper {
 		// return true if the prefix matches
 		return true;
 	}
+	*/
 }

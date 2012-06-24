@@ -320,7 +320,7 @@ JNIEXPORT void JNICALL Java_uk_ac_cam_cl_xf214_blackadderWrapper_BAWrapperNB_c_1
 	}
 	
 	jbyte *data_ptr = (*env).GetByteArrayElements(data, &copy);
-	char *data_native_ptr = (char *)calloc((int)datalen, sizeof(char *));
+	char *data_native_ptr = (char *)calloc((int)datalen, sizeof(char));
 	for (int i = 0; i < datalen; i++) {
 		data_native_ptr[i] = (char)data_ptr[i];
 	}
